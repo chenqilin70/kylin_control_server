@@ -1,4 +1,4 @@
-package com.huwl.oracle.kylinremotecontrol.dao;
+package com.huwl.oracle.kylin_control_server.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

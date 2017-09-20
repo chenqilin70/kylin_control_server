@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NetMessage implements Serializable{
-	public static final int LOGIN=0,REGISTER=1;
+	public static final int LOGIN=0,REGISTER=1,REQUEST_QR_CODE=3
+			,PROVIDE_QR_CODE=4,VALIDATE_LOGIN=5;
 	private int forWhat;
 	private User user;
 	private Map map=new HashMap();;

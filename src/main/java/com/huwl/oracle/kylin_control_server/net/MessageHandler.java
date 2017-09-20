@@ -1,32 +1,39 @@
-package com.huwl.oracle.kylinremotecontrol.beans;
+package com.huwl.oracle.kylin_control_server.net;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.huwl.oracle.kylinremotecontrol.dao.UserDao;
+import com.huwl.oracle.kylin_control_server.dao.UserDao;
+import com.huwl.oracle.kylinremotecontrol.beans.NetMessage;
+import com.huwl.oracle.kylinremotecontrol.beans.Terminal;
+import com.huwl.oracle.kylinremotecontrol.beans.User;
 
 public class MessageHandler {
-	static Map<String,Socket> terminals=new HashMap<String, Socket>();
+	volatile static Map<Terminal,Socket> terminals=new HashMap<Terminal, Socket>();
 	private static UserDao userDao=new UserDao();
 
 	public static void handle(final Socket client) {
-		while(true){
+		LOOP :while(true){
 			
 			ObjectInputStream in=null;
 			try {
 				in=new ObjectInputStream(client.getInputStream());
 			} catch (IOException e) {
 				
-				for(String k:terminals.keySet()){
-					if(k.endsWith(client.getInetAddress().toString())){
+				for(Terminal k:terminals.keySet()){
+					if(client.getInetAddress().toString().equals(k.getIp())){
 						terminals.remove(k);
 						System.out.println(e.getMessage()+":客户端关闭了App"+k);
+						break LOOP;
 					}
 				}
 				break;
+				
 			}
 			final NetMessage m;
 			NetMessage o = null;
@@ -45,13 +52,37 @@ public class MessageHandler {
 						login(m,client);
 					}else if(forWhat==NetMessage.REGISTER){
 						register(m,client);
+					}else if(forWhat==NetMessage.REQUEST_QR_CODE){
+						requestQRCode(m,client);
 					}
-				};
+				}
+
+				
 			}.start();
 			
 		}
 	}
-
+	private static void requestQRCode(NetMessage m, Socket client) {
+		Terminal terminal=(Terminal) m.getMap().get("terminal");
+		String username=terminal.getUsername();
+		if(username==null){
+			//存下socket
+			terminals.put(terminal, client);
+			//要求其显示二维码
+			NetMessage result=new NetMessage();
+			result.setForWhat(NetMessage.PROVIDE_QR_CODE);
+			result.send(client);
+			
+		}/*else{
+			if(//Android设备已登录){
+				//发送Socket，要求手机确认
+					
+			}else{
+				//登录请求存入数据库
+			}
+			//返回信息要求等待手机确认
+		}*/
+	};
 	private static void register(NetMessage m, Socket client) {
 		User user=m.getUser();
 		NetMessage result=new NetMessage();
@@ -71,7 +102,7 @@ public class MessageHandler {
 		result.getMap().put("isLogin", flag);
 		if(flag){
 			System.out.println("登录一个设备"+user.getUserId()+":"+socket.getInetAddress());
-			terminals.put(user.getUserId()+":"+socket.getInetAddress(),socket);
+			terminals.put(((Terminal)m.getMap().get("terminal")),socket);
 		}
 		
 		result.setForWhat(NetMessage.LOGIN);
