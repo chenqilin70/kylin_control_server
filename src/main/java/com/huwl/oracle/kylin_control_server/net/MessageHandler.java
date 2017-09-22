@@ -24,8 +24,9 @@ public class MessageHandler {
 			try {
 				in=new ObjectInputStream(client.getInputStream());
 			} catch (IOException e) {
-				
+				System.out.println("发现有app关闭");
 				for(Terminal k:terminals.keySet()){
+					System.out.println(client.getInetAddress().toString()+"==="+k.getIp());
 					if(client.getInetAddress().toString().equals(k.getIp())){
 						terminals.remove(k);
 						System.out.println(e.getMessage()+":客户端关闭了App"+k);
@@ -54,17 +55,32 @@ public class MessageHandler {
 						register(m,client);
 					}else if(forWhat==NetMessage.REQUEST_QR_CODE){
 						requestQRCode(m,client);
+					}else if(forWhat==NetMessage.AUTO_LOGIN){
+						autoLogin(m,client);
 					}
 				}
-
-				
 			}.start();
-			
 		}
+	}
+	private static void autoLogin(NetMessage m, Socket client) {
+		User user=m.getUser();
+		NetMessage result=new NetMessage();
+		boolean flag=userDao.login(user);
+		result.getMap().put("isLogin", flag);
+		result.setUser(user);
+		if(flag){
+			System.out.println("登录一个设备"+user.getUserId()+":"+client.getInetAddress());
+			Terminal t=((Terminal)m.getMap().get("terminal"));
+			t.setIp(client.getInetAddress().toString());
+			terminals.put(t,client);
+		}
+		
+		result.setForWhat(NetMessage.AUTO_LOGIN);
+		result.send(client);
 	}
 	private static void requestQRCode(NetMessage m, Socket client) {
 		Terminal terminal=(Terminal) m.getMap().get("terminal");
-		String username=terminal.getUsername();
+		String username=terminal.getUser().getUserId();
 		if(username==null){
 			//存下socket
 			terminals.put(terminal, client);
@@ -100,9 +116,12 @@ public class MessageHandler {
 		NetMessage result=new NetMessage();
 		boolean flag=userDao.login(user);
 		result.getMap().put("isLogin", flag);
+		result.setUser(user);
 		if(flag){
 			System.out.println("登录一个设备"+user.getUserId()+":"+socket.getInetAddress());
-			terminals.put(((Terminal)m.getMap().get("terminal")),socket);
+			Terminal t=((Terminal)m.getMap().get("terminal"));
+			t.setIp(socket.getInetAddress().toString());
+			terminals.put(t,socket);
 		}
 		
 		result.setForWhat(NetMessage.LOGIN);

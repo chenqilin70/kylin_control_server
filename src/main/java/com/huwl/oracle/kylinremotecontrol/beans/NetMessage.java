@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class NetMessage implements Serializable{
 	public static final int LOGIN=0,REGISTER=1,REQUEST_QR_CODE=3
-			,PROVIDE_QR_CODE=4,VALIDATE_LOGIN=5;
+			,PROVIDE_QR_CODE=4,VALIDATE_LOGIN=5,AUTO_LOGIN=6;
 	private int forWhat;
 	private User user;
 	private Map map=new HashMap();;

@@ -32,10 +32,6 @@ public class MainServer {
 				e.printStackTrace();
 			}
 		}
-		
-		
-		
-
 	}
 
 }

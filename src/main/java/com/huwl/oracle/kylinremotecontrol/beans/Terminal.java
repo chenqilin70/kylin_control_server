@@ -7,16 +7,18 @@ public class Terminal implements Serializable{
 	private String name;
 	private String systemType;
 	private String remark;
-	private String username;
+	private User user;
 	private String ip;
-	
-	
-	public String getUsername() {
-		return username;
+
+
+	public User getUser() {
+		return user;
 	}
-	public void setUsername(String username) {
-		this.username = username;
+
+	public void setUser(User user) {
+		this.user = user;
 	}
+
 	public String getRemark() {
 		return remark;
 	}
