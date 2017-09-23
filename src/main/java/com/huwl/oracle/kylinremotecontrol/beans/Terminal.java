@@ -70,6 +70,10 @@ public class Terminal implements Serializable{
 			return false;
 		}
 	}
+
+	public Terminal() {
+	}
+	
 	
 	
 	

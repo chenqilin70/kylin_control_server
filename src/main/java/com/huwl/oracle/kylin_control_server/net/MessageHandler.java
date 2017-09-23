@@ -3,8 +3,7 @@ package com.huwl.oracle.kylin_control_server.net;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,10 +56,17 @@ public class MessageHandler {
 						requestQRCode(m,client);
 					}else if(forWhat==NetMessage.AUTO_LOGIN){
 						autoLogin(m,client);
+					}else if(forWhat==NetMessage.VALIDATE_LOGIN){
+						validateLogin(m,client);
 					}
 				}
 			}.start();
 		}
+	}
+	private static void validateLogin(NetMessage m, Socket client) {
+		Terminal t=(Terminal) m.getMap().get("terminal");
+		Socket socket=terminals.get(t);
+		m.send(socket);
 	}
 	private static void autoLogin(NetMessage m, Socket client) {
 		User user=m.getUser();
@@ -80,13 +86,15 @@ public class MessageHandler {
 	}
 	private static void requestQRCode(NetMessage m, Socket client) {
 		Terminal terminal=(Terminal) m.getMap().get("terminal");
-		String username=terminal.getUser().getUserId();
-		if(username==null){
+		User user=terminal.getUser();
+		if(terminal.getUser()==null){
 			//存下socket
+			terminal.setId(client.getInetAddress().toString());
 			terminals.put(terminal, client);
 			//要求其显示二维码
 			NetMessage result=new NetMessage();
 			result.setForWhat(NetMessage.PROVIDE_QR_CODE);
+			result.getMap().put("date", new Date());
 			result.send(client);
 			
 		}/*else{

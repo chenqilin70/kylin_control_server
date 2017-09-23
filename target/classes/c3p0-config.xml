@@ -4,7 +4,7 @@
 	      <property name="user">KylinControl</property>
 	      <property name="password">123456</property>
 	      <property name="driverClass">com.mysql.jdbc.Driver</property>
-	      <property name="jdbcUrl">jdbc:mysql://120.24.244.103:3306/KylinControl</property>
+	      <property name="jdbcUrl">jdbc:mysql://localhost:3306/KylinControl</property>
 			<!-- 以上的user是数据库的用户，password是数据库的密码，driverClass是mysql的数据库驱动，jdbcUrl是连接数据库的url -->
        	<!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数 -->
 		<property name="acquireIncrement">10</property>
